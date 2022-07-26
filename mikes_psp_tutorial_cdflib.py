@@ -15,20 +15,26 @@ assert len(file_paths) == 1, f"Found {len(file_paths)} paths. In {current_dir}."
 file_path = file_paths[0]
 
 cdf = cdflib.CDF(file_path)
-unix_time = cdf.varget("TIME")
 time = cdflib.cdfepoch.to_datetime(cdf.varget('Epoch'))
+mag_vel = np.sqrt(cdf.varget('VEL_RTN_SUN')[:, 0]**2 + cdf.varget('VEL_RTN_SUN')[:, 1]**2 + cdf.varget('VEL_RTN_SUN')[:, 2]**2)
 
-fig, ax = plt.subplots(2, 1, sharex=True)
+fig, ax = plt.subplots(3, 1, sharex=True, figsize=(6, 7))
 ax[0].plot(time, cdf.varget('DENS'))
 for i, component in enumerate(['X', 'Y', 'Z']):
     ax[1].plot(time, cdf.varget('VEL_RTN_SUN')[:, i], label=f"$V_{{{component}}}$")
+ax[2].plot(time, mag_vel, label='|V|')
+
 ax[0].set(
-    title=f'PSP SWP SPI data from {load_date}',
+    title=f'PSP SWP SPI data from {load_date.date()}',
     ylabel=f'$cm^{3}$'
 )
 ax[1].set(
+    ylabel=f'km/s'
+)
+ax[-1].set(
     xlabel='Time',
     ylabel=f'km/s'
 )
 ax[1].legend()
+plt.tight_layout()
 plt.show()
